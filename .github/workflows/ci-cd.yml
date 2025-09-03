@@ -191,25 +191,19 @@ jobs:
     if: always() && (needs.deploy-development.result == 'success' || needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
     steps:
       - name: Check development health
-        if: needs.deploy-development.result == 'success'
+        if: needs.deploy-development.result == 'success' && secrets.DEV_URL != ''
         run: |
-          if [ "${{ secrets.DEV_URL }}" != "" ]; then
-            curl -f ${{ secrets.DEV_URL }}/api/health
-          fi
+          curl -f ${{ secrets.DEV_URL }}/api/health
 
       - name: Check staging health
-        if: needs.deploy-staging.result == 'success'
+        if: needs.deploy-staging.result == 'success' && secrets.STAGING_URL != ''
         run: |
-          if [ "${{ secrets.STAGING_URL }}" != "" ]; then
-            curl -f ${{ secrets.STAGING_URL }}/api/health
-          fi
+          curl -f ${{ secrets.STAGING_URL }}/api/health
 
       - name: Check production health
-        if: needs.deploy-production.result == 'success'
+        if: needs.deploy-production.result == 'success' && secrets.PROD_URL != ''
         run: |
-          if [ "${{ secrets.PROD_URL }}" != "" ]; then
-            curl -f ${{ secrets.PROD_URL }}/api/health
-          fi
+          curl -f ${{ secrets.PROD_URL }}/api/health
 
   notify:
     name: Notify Team
