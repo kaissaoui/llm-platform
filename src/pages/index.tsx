@@ -23,9 +23,21 @@ const Home: NextPage = () => {
               <div className="flex items-center justify-center">
                 <span className="text-2xl mr-2">🚀</span>
                 <div>
-                  <strong>Deployment Test Successful!</strong>
+                  <strong>Deployment Test #2 Successful!</strong>
                   <br />
-                  <span className="text-sm">Your LLM Platform is now live on AWS! - {new Date().toLocaleString()}</span>
+                  <span className="text-sm">CI/CD Pipeline Working Perfectly! - {new Date().toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Second Test Banner */}
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-6 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center">
+                <span className="text-2xl mr-2">⚡</span>
+                <div>
+                  <strong>Automated Deployment Active!</strong>
+                  <br />
+                  <span className="text-sm">Ready for daily releases! - {new Date().toLocaleString()}</span>
                 </div>
               </div>
             </div>
