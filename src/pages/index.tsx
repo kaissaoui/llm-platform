@@ -17,6 +17,18 @@ const Home: NextPage = () => {
             <h1 className="text-6xl font-bold text-gray-900 mb-6">
               LLM Platform
             </h1>
+            
+            {/* Deployment Test Banner */}
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center">
+                <span className="text-2xl mr-2">🚀</span>
+                <div>
+                  <strong>Deployment Test Successful!</strong>
+                  <br />
+                  <span className="text-sm">Your LLM Platform is now live on AWS! - {new Date().toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Organize your AI interactions into topic-based experiences with custom AI personalities, 
               system prompts, and intelligent agents that optimize your workspace over time.
