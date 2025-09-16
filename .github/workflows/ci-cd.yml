@@ -154,13 +154,14 @@ jobs:
       - name: Deploy to staging server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USERNAME }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           script: |
-            cd /opt/llm-platform-staging
-            docker-compose pull
-            docker-compose up -d
+            cd /home/ubuntu/llm-platform
+            git pull origin main
+            docker-compose down
+            docker-compose up -d --build
             sleep 10
             curl -f http://localhost:3000/api/health || exit 1
 
@@ -200,8 +201,8 @@ jobs:
       - name: Check staging health
         if: needs.deploy-staging.result == 'success'
         run: |
-          if [ "${{ secrets.STAGING_URL }}" != "" ]; then
-            curl -f ${{ secrets.STAGING_URL }}/api/health
+          if [ "${{ secrets.DEV_URL }}" != "" ]; then
+            curl -f ${{ secrets.DEV_URL }}/api/health
           fi
 
       - name: Check production health
