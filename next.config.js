@@ -5,6 +5,9 @@ const nextConfig = {
   generateEtags: false,
   reactStrictMode: true,
   swcMinify: true,
+  compiler: {
+    reactRemoveProperties: false,
+  },
   images: {
     domains: ['localhost'],
     formats: ['image/webp', 'image/avif'],
