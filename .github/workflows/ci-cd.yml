@@ -14,8 +14,6 @@ on:
         type: choice
         options:
         - development
-        - staging
-        - production
       branch:
         description: 'Branch to deploy from'
         required: true
@@ -138,26 +136,6 @@ jobs:
           username: ${{ secrets.DEV_USERNAME }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
-            cd /opt/llm-platform-development
-            docker-compose pull
-            docker-compose up -d
-            sleep 10
-            curl -f http://localhost:3000/api/health || exit 1
-
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    environment: staging
-    steps:
-      - name: Deploy to staging server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEV_HOST }}
-          username: ${{ secrets.DEV_USERNAME }}
-          key: ${{ secrets.DEV_SSH_KEY }}
-          script: |
             cd /home/ubuntu/llm-platform
             git pull origin main
             docker-compose down
@@ -165,57 +143,22 @@ jobs:
             sleep 10
             curl -f http://localhost:3000/api/health || exit 1
 
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
-    environment: production
-    steps:
-      - name: Deploy to production server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USERNAME }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          script: |
-            cd /opt/llm-platform-production
-            docker-compose pull
-            docker-compose up -d
-            sleep 10
-            curl -f https://${{ secrets.PROD_URL }}/api/health || exit 1
-
   health-check:
     name: Health Check
     runs-on: ubuntu-latest
-    needs: [deploy-development, deploy-staging, deploy-production]
-    if: always() && (needs.deploy-development.result == 'success' || needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    needs: [deploy-development]
+    if: always() && needs.deploy-development.result == 'success'
     steps:
       - name: Check development health
-        if: needs.deploy-development.result == 'success'
         run: |
           if [ "${{ secrets.DEV_URL }}" != "" ]; then
             curl -f ${{ secrets.DEV_URL }}/api/health
-          fi
-
-      - name: Check staging health
-        if: needs.deploy-staging.result == 'success'
-        run: |
-          if [ "${{ secrets.DEV_URL }}" != "" ]; then
-            curl -f ${{ secrets.DEV_URL }}/api/health
-          fi
-
-      - name: Check production health
-        if: needs.deploy-production.result == 'success'
-        run: |
-          if [ "${{ secrets.PROD_URL }}" != "" ]; then
-            curl -f ${{ secrets.PROD_URL }}/api/health
           fi
 
   notify:
     name: Notify Team
     runs-on: ubuntu-latest
-    needs: [deploy-development, deploy-staging, deploy-production, health-check]
+    needs: [deploy-development, health-check]
     if: always()
     steps:
       - name: Notify Slack
@@ -227,11 +170,11 @@ jobs:
           channel: '#deployments'
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           text: |
-            🚀 Deployment Status: ${{ job.status }}
+            🚀 Development Deployment Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
-            Environment: ${{ github.event.inputs.environment || 'auto' }}
+            Environment: Development
             Run: ${{ github.run_number }}
 
       - name: Notify on failure
@@ -242,10 +185,10 @@ jobs:
           channel: '#alerts'
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           text: |
-            ❌ Deployment Failed!
+            ❌ Development Deployment Failed!
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
-            Environment: ${{ github.event.inputs.environment || 'auto' }}
+            Environment: Development
             Run: ${{ github.run_number }}
             Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
