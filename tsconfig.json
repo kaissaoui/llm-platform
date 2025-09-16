@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "preserve", // Required for Next.js 14+ - DO NOT CHANGE TO "preserve"
     "incremental": true,
     "plugins": [
       {
